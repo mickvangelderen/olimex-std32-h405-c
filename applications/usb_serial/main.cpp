@@ -26,45 +26,48 @@
  */
 int main(void) {
 
-    /*
-     * System initializations.
-     * - HAL initialization, this also initializes the configured device drivers
-     *   and performs the board-specific initializations.
-     * - Kernel initialization, the main() function becomes a thread and the
-     *   RTOS is active.
-     */
-    halInit();
-    chSysInit();
+  /*
+   * System initializations.
+   * - HAL initialization, this also initializes the configured device drivers
+   *   and performs the board-specific initializations.
+   * - Kernel initialization, the main() function becomes a thread and the
+   *   RTOS is active.
+   */
+  halInit();
+  chSysInit();
 
-    /*
-     * Initializes a serial-over-USB CDC driver.
-     */
-    sduObjectInit(&SDU1);
-    sduStart(&SDU1, &serusbcfg);
+  /*
+   * Initializes a serial-over-USB CDC driver.
+   */
+  sduObjectInit(&SDU1);
+  sduStart(&SDU1, &serusbcfg);
 
-    /*
-     * Activates the USB driver and then the USB bus pull-up on D+.
-     * Note, a delay is inserted in order to not have to disconnect the cable
-     * after a reset.
-     */
-    board_usb_lld_disconnect_bus();   //usbDisconnectBus(serusbcfg.usbp);
-    chThdSleepMilliseconds(1500);
-    usbStart(serusbcfg.usbp, &usbcfg);
-    board_usb_lld_connect_bus();      //usbConnectBus(serusbcfg.usbp);
+  /*
+   * Activates the USB driver and then the USB bus pull-up on D+.
+   * Note, a delay is inserted in order to not have to disconnect the cable
+   * after a reset.
+   */
+  board_usb_lld_disconnect_bus(); // usbDisconnectBus(serusbcfg.usbp);
+  chThdSleepMilliseconds(1500);
+  usbStart(serusbcfg.usbp, &usbcfg);
+  board_usb_lld_connect_bus(); // usbConnectBus(serusbcfg.usbp);
 
-    /*
-     * Creates the example thread.
-     */
-    chBlinkThreadCreateStatic();
+  /*
+   * Creates the example thread.
+   */
+  chBlinkThreadCreateStatic();
 
-    /*
-     * Normal main() thread activity, in this demo it does nothing except
-     * sleeping in a loop and check the button state.
-     */
-    while (true) {
-        if (!palReadLine(LINE_BUTTON)) { /* Button is active LOW. */
-            // TestThread(&SDU1);
-        }
-        chThdSleepMilliseconds(500);
+  /*
+   * Normal main() thread activity, in this demo it does nothing except
+   * sleeping in a loop and check the button state.
+   */
+  while (true) {
+    if (!palReadLine(LINE_BUTTON)) { /* Button is active LOW. */
+      if (SDU1.config->usbp->state == USB_ACTIVE) {
+        char text[] = "Hello from Olimex!\r\n";
+        chnWrite(&SDU1, (const uint8_t *)text, sizeof(text));
+      }
     }
+    chThdSleepMilliseconds(500);
+  }
 }
