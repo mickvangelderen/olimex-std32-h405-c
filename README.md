@@ -45,3 +45,8 @@ https://armengineer.com/stm32-p405-startup-code-exploring-the-arm-cortex-m/
 
 Turns out I was trying to write to the wrong location, missed a 0 in the declaration of the flash memory region.
 
+## LTO removes `_exit` `_abort` and `_getpid`
+
+Have to add `__attribute__((used))` to `cpp_wrappers` in ChibiOS.
+http://www.chibios.com/forum/viewtopic.php?t=2842
+
